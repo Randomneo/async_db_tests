@@ -27,7 +27,9 @@ engine = create_async_engine(
     configer.get('DATABASE_URL'),
 )
 async_session = sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False,
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
 )
 
 app = FastAPI()
