@@ -1,0 +1,38 @@
+version: "3.8"
+
+x-db-envs: &db-envs
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+  POSTGRES_USER: ${POSTGRES_USER:-user}
+  POSTGRES_DB: ${POSTGRES_DB:-db}
+  POSTGRES_TEST_DB: ${POSTGRES_DB:-test_db}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:${BE_INNER_UVICORN_PORT:-8080}"
+    volumes:
+      - .:/opt/project
+    command: "uvicorn app:app --host 0.0.0.0 --port ${BE_INNER_UVICORN_PORT:-8080} --reload"
+    environment:
+      <<: *db-envs
+      DB_HOST: ${DB_HOST:-db}
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      <<: *db-envs
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+
+
+volumes:
+  db_volume:
